@@ -1,24 +1,21 @@
-#include <vulkan/vulkan.hpp>
 #include "app/VkApp.h"
-#include "GLFW/glfw3.h"
+#include "vulkan/vulkan.hpp"
+#include <iostream>
 
 int main() {
-    if (!glfwInit()) {
-        return -1;
-    }
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window = glfwCreateWindow(640, 480, "Vulkan Demo", nullptr, nullptr);
-    if (!window) {
-        glfwTerminate();
-        return -1;
-    }
+  VkApp *app = new VkApp();
 
-    while (!glfwWindowShouldClose(window)) {
-        glfwPollEvents();
-    }
+  if (app->initialize() != 0) {
+    std::cout << "App starting error" << std::endl;
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    return -1;
+  }
 
-    return 0;
+  app->run();
+
+  app->terminate();
+
+  delete app;
+
+  return 0;
 }
