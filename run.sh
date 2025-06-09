@@ -8,11 +8,11 @@ cd build || exit 1
 
 cmake .. \
   && cmake --build . \
-  && echo "Сборка выполнена успешно."
+  && echo "The build was completed successfully."
 
 if [ -x ./bin/vk_first ]; then
   ./bin/vk_first
 else
-  echo "Ошибка: ./bin/vk_first не найден или не исполнителен."
+  echo "Failure: ./bin/vk_first was not found"
   exit 1
 fi
