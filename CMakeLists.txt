@@ -69,15 +69,18 @@ if(WIN32)
     )
 
 elseif(APPLE)
-    find_library(GLFW_DYLIB
-        NAMES glfw3 glfw
-        PATHS /usr/local/lib /opt/homebrew/lib /usr/lib
+    find_file(GLFW_STATIC_LIB
+        NAMES libglfw3.a
+        PATHS "${CMAKE_SOURCE_DIR}"
     )
-    if(NOT GLFW_DYLIB)
-        message(FATAL_ERROR "GLFW not found on macOS; please install via Homebrew")
+    
+    if(NOT GLFW_STATIC_LIB)
+        message(FATAL_ERROR "Static GLFW library (libglfw3.a) not found")
     endif()
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE "${GLFW_STATIC_LIB}")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_STATIC)
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        ${GLFW_DYLIB}
         "-framework Cocoa"
         "-framework IOKit"
         "-framework CoreVideo"
