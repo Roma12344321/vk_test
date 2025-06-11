@@ -1,21 +1,25 @@
 #include "app/VkApp.h"
-#include "vulkan/vulkan.hpp"
 #include <iostream>
 
 int main() {
   VkApp *app = new VkApp();
 
-  if (app->initialize() != 0) {
-    std::cout << "App starting error" << std::endl;
+  try {
+    app->initialize();
+
+    app->run();
+
+    app->cleanUp();
+
+    delete app;
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+    app->cleanUp();
+
+    delete app;
 
     return -1;
   }
-
-  app->run();
-
-  app->cleanUp();
-
-  delete app;
 
   return 0;
 }

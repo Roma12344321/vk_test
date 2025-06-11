@@ -8,7 +8,7 @@
 class VkApp {
 
 public:
-  int initialize();
+  void initialize();
   void run();
   void cleanUp();
 
@@ -16,10 +16,12 @@ private:
   GLFWwindow *window;
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
+  VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
   void initVulkan();
   void createInstance();
   void setupDebugMessenger();
+  void pickPhysicalDevice();
 };
 
 #endif
