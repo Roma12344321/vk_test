@@ -13,7 +13,7 @@ int main() {
 
   app->run();
 
-  app->terminate();
+  app->cleanUp();
 
   delete app;
 

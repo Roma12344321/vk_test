@@ -10,17 +10,15 @@ class VkApp {
 public:
   int initialize();
   void run();
-  void terminate();
+  void cleanUp();
 
 private:
   GLFWwindow *window;
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
-  
-std::vector<const char*> getRequiredExtensions();
+
   void initVulkan();
   void createInstance();
-  bool checkValidationLayerSupport();
   void setupDebugMessenger();
 };
 
