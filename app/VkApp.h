@@ -23,6 +23,7 @@ private:
   VkDebugUtilsMessengerEXT debugMessenger;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
   VkDevice device;
+  VkQueue graphicsQueue;
 
   void initVulkan();
   void createInstance();

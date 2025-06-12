@@ -1,5 +1,7 @@
 #include "VkApp.h"
 
+#include <cstring>
+#include <optional>
 #include <iostream>
 #include <vector>
 
@@ -27,7 +29,7 @@ static bool checkValidationLayerSupport() {
     bool layerFound = false;
 
     for (const auto &layerProperties : availableLayers) {
-      if (strcmp(layerName, layerProperties.layerName) == 0) {
+      if (std::strcmp(layerName, layerProperties.layerName) == 0) {
         layerFound = true;
         break;
       }
@@ -119,6 +121,7 @@ void VkApp::run() {
 }
 
 void VkApp::cleanUp() {
+  vkDestroyDevice(device, nullptr);
   if (enableValidationLayers)
     destroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
   vkDestroyInstance(instance, nullptr);
@@ -206,13 +209,13 @@ void VkApp::setupDebugMessenger() {
 
 struct QueueFamilyIndices {
 public:
-  uint32_t graphicsFamily;
+  std::optional<uint32_t> graphicsFamily;
 
-  bool isComplete() { return graphicsFamily != 0; }
+  bool isComplete() { return graphicsFamily.has_value(); }
 };
 
 static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
-  QueueFamilyIndices indices;
+  QueueFamilyIndices indices = {};
   uint32_t queueFamilyCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
@@ -269,7 +272,7 @@ void VkApp::createLogicalDevice() {
   VkDeviceQueueCreateInfo queueCreateInfo{};
 
   queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-  queueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
+  queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
   queueCreateInfo.queueCount = 1;
 
   float queuePriority = 1.0f;
@@ -284,4 +287,18 @@ void VkApp::createLogicalDevice() {
   createInfo.queueCreateInfoCount = 1;
 
   createInfo.pEnabledFeatures = &deviceFeatures;
+
+  createInfo.enabledExtensionCount = 0;
+
+  if (enableValidationLayers) {
+    createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+    createInfo.ppEnabledLayerNames = validationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+  }
+  if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+    throw std::runtime_error("failed to create logical device!");
+  }
+  vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+
 }
