@@ -1,10 +1,8 @@
 #include "VkApp.h"
 
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <optional>
-#include <stdexcept>
+#include <vector>
+
 
 #define WIDTH 800
 #define HEIGHT 600
@@ -132,6 +130,7 @@ void VkApp::initVulkan() {
   createInstance();
   setupDebugMessenger();
   pickPhysicalDevice();
+  createLogicalDevice();
 }
 
 void VkApp::createInstance() {
@@ -206,11 +205,10 @@ void VkApp::setupDebugMessenger() {
 }
 
 struct QueueFamilyIndices {
-  std::optional<uint32_t> graphicsFamily;
+public:
+  uint32_t graphicsFamily;
 
-  bool isComplete() {
-        return graphicsFamily.has_value();
-    }
+  bool isComplete() { return graphicsFamily != 0; }
 };
 
 static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
@@ -228,7 +226,7 @@ static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
 
     i++;
   }
-  
+
   return indices;
 }
 
@@ -236,15 +234,13 @@ static bool isDeviceSuitable(VkPhysicalDevice device) {
   VkPhysicalDeviceProperties deviceProperties;
   vkGetPhysicalDeviceProperties(device, &deviceProperties);
 
-  VkPhysicalDeviceFeatures deviceFeatures;
-  vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
   auto indices = findQueueFamilies(device);
 
   return (deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ||
-         deviceProperties.deviceType ==
-             VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
-         deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER) && indices.isComplete();
+          deviceProperties.deviceType ==
+              VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
+          deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_OTHER) &&
+         indices.isComplete();
 }
 
 void VkApp::pickPhysicalDevice() {
@@ -266,4 +262,26 @@ void VkApp::pickPhysicalDevice() {
 
   if (physicalDevice == VK_NULL_HANDLE)
     throw std::runtime_error("failed to find a suitable GPU!");
+}
+
+void VkApp::createLogicalDevice() {
+  auto indices = findQueueFamilies(physicalDevice);
+  VkDeviceQueueCreateInfo queueCreateInfo{};
+
+  queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  queueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
+  queueCreateInfo.queueCount = 1;
+
+  float queuePriority = 1.0f;
+  queueCreateInfo.pQueuePriorities = &queuePriority;
+
+  VkPhysicalDeviceFeatures deviceFeatures{};
+
+  VkDeviceCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+  createInfo.pQueueCreateInfos = &queueCreateInfo;
+  createInfo.queueCreateInfoCount = 1;
+
+  createInfo.pEnabledFeatures = &deviceFeatures;
 }
